@@ -56,7 +56,7 @@ class BacktrackingMRVSolver(SudokuSolver):
             # Update candidates for peers
             old_candidates = self.board.candidates[row][col]
             self.board.candidates[row][col] = set()
-            self.board._remove_candidates_for_value(row, col, value)
+            self.board._remove_candidates_for_value(row, col, value, self.board.candidates)
 
             # Recurse
             if self._solve_recursive():
@@ -65,8 +65,8 @@ class BacktrackingMRVSolver(SudokuSolver):
             # Backtrack
             self.board.board[row][col] = 0
             self.board.candidates[row][col] = old_candidates
-            # Restore candidates (simplified - just reinitialize for cell)
-            self._restore_candidates_on_backtrack(row, col, value)
+            # Restore candidates for peers affected by this value
+            self.board._remove_candidates_for_value(row, col, value, self.board.candidates, adding=True)
             self.backtracks += 1
 
         return False

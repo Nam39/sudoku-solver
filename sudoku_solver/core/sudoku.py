@@ -70,38 +70,55 @@ class SudokuBoard:
         col: int,
         value: int,
         candidates: Optional[List[List[Set[int]]]] = None,
+        adding: bool = False,
     ) -> None:
         """
-        Remove a value from candidates of all peers of a cell.
+        Remove or add a value from candidates of all peers of a cell.
 
         Args:
             row: Row index
             col: Column index
-            value: Value to remove
+            value: Value to remove or add
             candidates: Optional candidates structure to update. If None, uses self.candidates
+            adding: If True, adds the value back to candidates instead of removing it
         """
         if candidates is None:
             candidates = self.candidates
 
         target_candidates = candidates
 
-        # Remove from row peers
+        # Process row peers
         for c in range(self.GRID_SIZE):
             if c != col:
-                target_candidates[row][c].discard(value)
+                if adding:
+                    # Only add back if the cell is empty and the value isn't already present
+                    if self.board[row][c] == self.EMPTY:
+                        target_candidates[row][c].add(value)
+                else:
+                    target_candidates[row][c].discard(value)
 
-        # Remove from column peers
+        # Process column peers
         for r in range(self.GRID_SIZE):
             if r != row:
-                target_candidates[r][col].discard(value)
+                if adding:
+                    # Only add back if the cell is empty and the value isn't already present
+                    if self.board[r][col] == self.EMPTY:
+                        target_candidates[r][col].add(value)
+                else:
+                    target_candidates[r][col].discard(value)
 
-        # Remove from box peers
+        # Process box peers
         box_row = (row // self.BOX_SIZE) * self.BOX_SIZE
         box_col = (col // self.BOX_SIZE) * self.BOX_SIZE
         for r in range(box_row, box_row + self.BOX_SIZE):
             for c in range(box_col, box_col + self.BOX_SIZE):
                 if r != row or c != col:
-                    target_candidates[r][c].discard(value)
+                    if adding:
+                        # Only add back if the cell is empty and the value isn't already present
+                        if self.board[r][c] == self.EMPTY:
+                            target_candidates[r][c].add(value)
+                    else:
+                        target_candidates[r][c].discard(value)
 
     def get_candidates(self, row: int, col: int) -> Set[int]:
         """
